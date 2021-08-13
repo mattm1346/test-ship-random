@@ -14,6 +14,7 @@ print(
 
 
 def check_board(b, taken):
+    b.sort()
     for i in range(len(b)):
         num = b[i]
         # Check for duplicates so ships do not overlap
@@ -29,8 +30,45 @@ def check_board(b, taken):
             if b[i+1] % 10 == 0:
                 b = [-1]
                 break
+        if i != 0:
+            if b[i+1] != b[i]+1 and b[i+1] != b[i]+10:
+                b = [-1]
+                break
 
     return b
+
+
+def get_ship(long, taken):
+    loop = True
+    while loop:
+        ship = []
+        # user input numbers
+        print('enter ship of length', long)
+        for i in range(long):
+            boat_num = input('Please enter a number ')
+            ship.append(int(boat_num))
+        # check ship
+        ship = check_board(ship, taken)
+        if ship[0] != -1:
+            taken = taken + ship
+            break
+        else:
+            print('error, try again')
+    return ship
+
+
+def create_ships_player():
+    taken = []
+    ships = []
+    boats = [5, 4, 3, 3, 2, 2]
+
+    for boat in boats:
+        ship = get_ship(boat, taken)
+        ships.append(ship)
+    return ships
+
+
+ships = create_ships_player()
 
 
 def check_boat(boat, start, direct, taken):
