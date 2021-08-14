@@ -31,7 +31,7 @@ def check_board(b, taken):
                 b = [-1]
                 break
         if i != 0:
-            if b[i+1] != b[i]+1 and b[i+1] != b[i]+10:
+            if b[i] != b[i-1]+1 and b[i] != b[i-1]+10:
                 b = [-1]
                 break
 
