@@ -2,7 +2,7 @@ from random import randrange
 import random
 
 print(
-    '''  ____       _______ _______ _      ______  _____ _    _ _____ _____   _____ 
+'''  ____       _______ _______ _      ______  _____ _    _ _____ _____   _____ 
 |  _ \   /\|__   __|__   __| |    |  ____|/ ____| |  | |_   _|  __ \ / ____|
 | |_) | /  \  | |     | |  | |    | |__  | (___ | |__| | | | | |__) | (___  
 |  _ < / /\ \ | |     | |  | |    |  __|  \___ \|  __  | | | |  ___/ \___ \ 
@@ -43,9 +43,10 @@ def get_ship(long, taken):
     while loop:
         ship = []
         # user input numbers
-        print('enter ship of length', long)
+        print('Place your fleet!')
+        print('Enter ship of length', long, 'between 0 and 99')
         for i in range(long):
-            boat_num = input('Please enter a number ')
+            boat_num = input('Please enter a number  \n')
             ship.append(int(boat_num))
         # check ship
         ship = check_board(ship, taken)
@@ -53,22 +54,18 @@ def get_ship(long, taken):
             taken = taken + ship
             break
         else:
-            print('error, try again')
+            print('Error, Ship not finished')
     return ship
 
 
-def create_ships_player():
-    taken = []
+def create_ships_player(taken):
     ships = []
     boats = [5, 4, 3, 3, 2, 2]
 
     for boat in boats:
         ship = get_ship(boat, taken)
         ships.append(ship)
-    return ships
-
-
-ships = create_ships_player()
+    return ships, taken
 
 
 def check_boat(boat, start, direct, taken):
@@ -77,27 +74,24 @@ def check_boat(boat, start, direct, taken):
     if direct == 1:
         for i in range(boat):
             b.append(start - i * 10)
-            b = check_board(b, taken)
     # right
     elif direct == 2:
         for i in range(boat):
             b.append(start + i)
-            b = check_board(b, taken)
     # down
     elif direct == 3:
         for i in range(boat):
             b.append(start + i * 10)
-            b = check_board(b, taken)
     # left
     elif direct == 4:
         for i in range(boat):
             b.append(start - i)
-            b = check_board(b, taken)
+    b = check_board(b, taken)
     return(b)
 
 
-def create_ships():
-    taken = []
+# Computer create ships
+def create_ships(taken):
     ships = []
     boats = [5, 4, 3, 3, 2, 2]
     for boat in boats:
@@ -116,6 +110,7 @@ def create_ships():
 
 # Create function to show board
 def show_board_c(taken):
+    print('      Computer Board'  )
     print('   0 1 2 3 4 5 6 7 8 9')
     # Create loop for board
     place = 0
@@ -130,7 +125,6 @@ def show_board_c(taken):
         print(x, row)
 
 
-# Add input for user guess
 def guess_comp(guesses, tactics):
     # Create while loop so guess will run until input is valid
     loop = 'no'
@@ -208,6 +202,7 @@ def calc_tactics(shot, tactics, guesses, hit):
                 temp = [shot+30, shot-10]
             else:
                 temp = [shot+20, shot-10]
+    # For longer ships
     cand = []
     for i in range(len(temp)):
         if temp[i] not in guesses and temp[i] < 100 and temp[i] > -1:
@@ -216,29 +211,79 @@ def calc_tactics(shot, tactics, guesses, hit):
     return cand
 
 
+# Add input for user guess
+def guess(guesses):
+    # Create while loop so guess will run until input is valid
+    loop = 'no'
+    while loop == 'no':
+        shot = input("Please enter your guess between 0 and 99: \n")
+        # Change shot to int as user input will be number
+        shot = int(shot)
+        # Create if statement checking that guess input is valid.
+        # (between 0 and 99)
+        if shot < 0 or shot > 99:
+            print("Sorry, that number is not on the board. Please try again")
+        # Check if user has used number before
+        elif shot in guesses:
+            print("Sorry, you've used that number before. Try another")
+        else:
+            loop = 'yes'
+            break
+    return shot
+
+
 def check_if_empty(list_of_lists):
     return all([not elem for elem in list_of_lists])
 
 
-hit = []
-miss = []
-sink = []
-guesses = []
-boats, taken = create_ships()
-tactics = []
+# Define lists and variables for actions
+# Board 1 - Computer
+hit1 = []
+miss1 = []
+sink1 = []
+guesses1 = []
+missed1 = 0
+tactics1 = []
+taken1 = []
+# Board 2 - Player
+hit2 = []
+miss2 = []
+sink2 = []
+guesses2 = []
+missed2 = 0
+tactics2 = []
+taken2 = []
+
+# Computer creates board
+boats, taken1 = create_ships(taken1)
+# User creates board
+ships, taken2 = create_ships_player(taken2)
+show_board_c(taken2)
+# Create loop for game
 for i in range(80):
-    shot, guesses = guess_comp(guesses, tactics)
-    boats, hit, miss, sink, missed = check_shot(shot, boats, hit, miss, sink)
-    if missed == 1:
-        tactics = calc_tactics(shot, tactics, guesses, hit)
-    elif missed == 2:
-        tactics = []
-    elif len(tactics) > 0:
-        tactics.pop(0)
+    # Player shoots
+    guesses2 = hit2 + miss2 + sink2
+    shot2 = guess(guesses2)
+    ships, hit2, miss2, sink2, missed2 = check_shot(shot2, ships, hit2, miss2, sink2)
+    show_board(hit2, miss2, sink2)
+    # Check player shot
 
+    # Repeat loop until ships empty
     if check_if_empty(boats):
-        print('Game Finished', i)
+        print('Game Finished - You Win', i)
         break
-
-show_board_c(taken)
-show_board(hit, miss, sink)
+    # Computer shoots
+    shot1, guesses1 = guess_comp(guesses1, tactics1)
+    boats, hit1, miss1, sink1, missed1 = check_shot(shot1, boats, hit1, miss1, sink1)
+    show_board(hit1, miss1, sink1)
+    # Check computer shot
+    if missed1 == 1:
+        tactics1 = calc_tactics(shot1, tactics1, guesses1, hit1)
+    elif missed1 == 2:
+        tactics1 = []
+    elif len(tactics1) > 0:
+        tactics1.pop(0)
+    # Repeat loop until ships empty
+    if check_if_empty(boats):
+        print('Game Finished - Computer Wins', i)
+        break
